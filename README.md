@@ -99,6 +99,7 @@ class JavassistPlugin implements Plugin<Project> {
 `implementation-class=com.app.plugin.JavassistPlugin`写上JavassistPlugin 的全路径
 
 然后执行`gradlew -p splugin uploadArchives`或者在右边栏找到`uploadArchives`命令执行。就会生成我们的插件，出现这个就带表我们生成的插件成功了。**每次修改后都要执行这个命令更新插件**
+
 ![生成插件目录](http://p9iqqot9p.bkt.clouddn.com/%E7%94%9F%E6%88%90%E6%8F%92%E4%BB%B6%E7%9B%AE%E5%BD%95.png)
 
 **project 的 build.gradle**下需要配置一下插件应用
