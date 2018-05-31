@@ -213,9 +213,11 @@ public class EventInjectTestClass {
 ```
 
 ## 实现
-需要 plugin module 引入 dependencies ` compile 'org.javassist:javassist:3.20.0-GA'`
 
-以下是插件**核心代码**，原理就是插入代码，说白了就是字符串拼接。groovy的语法也非常简单，**完全兼容 Java** 
+首先需要 plugin module 引入 dependencies ` compile 'org.javassist:javassist:3.20.0-GA'`来支持 javassist
+
+以下是插件**核心代码**，原理就是插入代码，说白了就是字符串拼接。groovy的语法也非常简单，**完全兼容 Java**
+ 有一点我想吐槽，他的语法跟 kotlin 相似，但是有没有模仿到位，就是 groovy 不支持传入被调用方法少于他需要的参数，kotlin 可以。我觉得可以优化下。
 
 ``` groovy
 ClassPool pool = ClassPool.getDefault();
@@ -234,6 +236,8 @@ cc.writeFile();//将内存的代码输出，调用了这个函数才真正修改
 ```
 
 具体实现代码，大家可以去我的github查看 **[https://github.com/luomoBM/AopTest](https://github.com/luomoBM/AopTest)**
+这个单独抽取出来当个 **事件分发库** 使用
+> 目前事件通知接收方法只支持少于等于一个参数，如果需要支持多个参数可自行修改。
 
 Javassist 还有很多 api 用法， 项目中没用到，如果大家感兴趣的话可以去 **[https://jboss-javassist.github.io/javassist/tutorial/tutorial.html](https://jboss-javassist.github.io/javassist/tutorial/tutorial.html)** 看看里面的文档，挺详细的，可以用 Google 翻译配合查看，别告诉我你不会科学上网。。
 
@@ -242,5 +246,5 @@ Javassist 还有很多 api 用法， 项目中没用到，如果大家感兴趣�
 **希望这个文章对大家有帮助，并且记录自己的成长，共勉。**
 
 如果文章对你有帮助，大家可以赞赏支持鼓励下作者。
-有什么疑问可以关注下方我的公众号， 留言就行。
-![我的个人公众号](http://p9iqqot9p.bkt.clouddn.com/wechatoa.jpg)
+ 有什么疑问可以关注下方我的公众号， 留言就行。
+ ![我的个人公众号](http://p9iqqot9p.bkt.clouddn.com/wechatoa.jpg)
