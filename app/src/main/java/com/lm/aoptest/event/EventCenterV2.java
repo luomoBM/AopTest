@@ -6,14 +6,14 @@ import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.lm.aoptest.util.ExecutorCenter;
 import com.lm.aoptest.util.StringUtils;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
- * Created by BM on 2018/5/23.
+ * Created by crizquan on 2018/5/23.
  * <p>
  * desc:
  */
@@ -61,9 +61,19 @@ public class EventCenterV2 {
     }
 
     public void unRegister(int eventTag) {
-        if (eventMap.get(eventTag) != null) {
+        CopyOnWriteArrayList<SparseArray<IEventCaller>> handlerList = eventMap.get(eventTag);
+        if (handlerList != null) {
+            for (SparseArray<IEventCaller> handler : handlerList) {
+                IEventCaller caller = handler.valueAt(0);
+                if (caller != null) {
+                    searchTagMap.remove(caller);
+                    searchSparseMap.remove(caller);
+                }
+            }
             eventMap.remove(eventTag);
+            return;
         }
+        Log.w(TAG, StringUtils.format("warning, unRegister null caller, eventTag = %d", eventTag));
     }
 
     public void unRegister(IEventCaller caller) {
