@@ -16,7 +16,6 @@ import com.lm.aoptest.event.EventTag;
  */
 public class EventActivity extends AppCompatActivity {
 
-
     private EventInjectTestClass mEventInjectTestClass;
 
     @Override
@@ -33,7 +32,7 @@ public class EventActivity extends AppCompatActivity {
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
 
-    @EventReceiver(EventTag.ON_TEST_EVENT_NORMAL_CLASS)
+    @EventReceiver(value = EventTag.ON_TEST_EVENT_NORMAL_CLASS, thread = EventReceiver.MAIN)
     public void methodEventNormalClassReceive(String str) {
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
