@@ -206,7 +206,7 @@ public class EventInjectTestClass {
     }
 
     @EventReceiver(EventTag.ON_TEST_EVENT_ACTIVITY, thread = EventReceiver.MAIN)
-    public void methodEventReceiveClass(String str) {
+    public void methodEventReceiveClass(String str) {//事件接收方法
         Toast.makeText(mContext, str, Toast.LENGTH_SHORT).show();
     }
 
@@ -215,9 +215,79 @@ public class EventInjectTestClass {
 
 ## 实现
 
+注册监听实现
+
+``` java
+ public void register(int eventTag, IEventCaller caller, int thread) {
+        if (caller == null) {
+            Log.w(TAG, StringUtils.format("regist null caller, tag = %d", eventTag));
+            return;
+        }
+        SparseArray<IEventCaller> callerList = new SparseArray<>();
+        callerList.put(thread, caller);
+        CopyOnWriteArrayList<SparseArray<IEventCaller>> exist = eventMap.get(eventTag);
+        if (exist != null) {
+            exist.add(callerList);
+        } else {
+            CopyOnWriteArrayList<SparseArray<IEventCaller>> handlerList = new CopyOnWriteArrayList<>();
+            handlerList.add(callerList);
+            eventMap.put(eventTag, handlerList);
+        }
+        searchTagMap.put(caller, eventTag);
+        searchSparseMap.put(caller, callerList);
+    }
+```
+
+反注册
+
+``` java
+  public void unRegister(IEventCaller caller) {
+        if (caller == null) {
+            Log.w(TAG, StringUtils.format("warning,  unRegister null caller"));
+            return;
+        }
+        Integer eventTag = searchTagMap.get(caller);
+        SparseArray<IEventCaller> handler = searchSparseMap.get(caller);
+        if (eventTag == null || handler == null) {
+            Log.w(TAG, StringUtils.format("fail unregist eventTag null or handler null, handler = %s, caller = %s",
+                    handler == null ? "null" : handler.toString(), eventTag == null ? "null" : eventTag.toString()));
+            return;
+        }
+        CopyOnWriteArrayList<SparseArray<IEventCaller>> exist = eventMap.get(eventTag);
+        if (exist != null) {
+            if (exist.remove(handler)) {
+                searchTagMap.remove(caller);
+                searchSparseMap.remove(caller);
+                return;
+            }
+            Log.w(TAG, StringUtils.format("fail unregist non exist handler = %s, caller = %s", handler.toString(), caller.toString()));
+            return;
+        }
+        Log.w(TAG, StringUtils.format("fail unregist non exist eventTag = %d", eventTag));
+ }
+```
+
+事件分发
+
+``` java
+ public void onEvent(int tag, Object data) {
+        CopyOnWriteArrayList<SparseArray<IEventCaller>> handlerList = eventMap.get(tag);
+        if (handlerList == null) {
+            return;
+        }
+        Message m = mHandler.obtainMessage();
+        m.obj = data;
+        m.what = tag;
+        Log.d(TAG, StringUtils.format("on event tag = &d, size = %d", tag, handlerList.size()));
+        for (SparseArray<IEventCaller> caller : handlerList) {
+            handlerCall(m, caller.keyAt(0), caller.valueAt(0));
+        }
+  }
+```
+
 首先需要 plugin module 引入 dependencies ` compile 'org.javassist:javassist:3.20.0-GA'`来支持 javassist
 
-以下是插件**核心代码**，原理就是插入代码，说白了就是字符串拼接。groovy的语法也非常简单，**完全兼容 Java**
+以下是插件 javassist **核心代码**， 用来实现自动注入代码。原理就是插入代码，说白了就是字符串拼接。groovy的语法也非常简单，**完全兼容 Java**
  有一点我想吐槽，他的语法跟 kotlin 相似，但是有没有模仿到位，就是 groovy 不支持传入被调用方法少于他需要的参数，kotlin 可以。我觉得可以优化下。
 
 ``` groovy
